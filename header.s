@@ -1,4 +1,12 @@
 # /root/assembly/h.s
+.text
+	.global write
+	.global read
+	.global exit
+	.global strlen
+	.global strchr
+	.global strcpy
+	.global puts
 
 # ssize_t write(int fd, const void *buf, size_t count);
 write:
@@ -64,6 +72,7 @@ exit:
 strlen:
 	push %ebp
 	mov  %esp, %ebp
+	push %ebx
 	push %ecx
 	push %esi
 
@@ -71,8 +80,8 @@ strlen:
 	mov  $0x00, %ecx      # counter
 
 .strlen_loop:
-	movb (%esi), %al
-	cmpb $0x00, %al  # null byte
+	movb (%esi), %bl
+	cmpb $0x00, %bl  # null byte
 	je   .strlen_final
 
 	inc  %esi
@@ -84,8 +93,47 @@ strlen:
 	
 	pop  %esi
 	pop  %ecx
+	pop  %ebx
 	leave
 	ret
+
+
+
+
+# char *strchr(const char *str, int chr);
+strchr:
+	push %ebp
+	mov  %esp, %ebp
+	push %esi
+	push %ebx
+
+	mov  0x08(%ebp), %esi
+	movb 0x0C(%ebp), %bl
+
+.strchr_loop:
+	cmpb (%esi), %bl  # chr
+	je   .strchr_true
+
+	cmpb $0x00, (%esi)# null byte
+	je   .strchr_false
+
+	inc  %esi
+	jmp  .strchr_loop
+
+.strchr_false:
+	mov $-0x01, %eax  # return -1
+	jmp .strchr_final
+
+.strchr_true:
+	mov %esi, %eax    # return string
+
+.strchr_final:
+	pop %ebx
+	pop %esi
+	leave
+	ret
+
+
 
 
 
@@ -130,6 +178,8 @@ strcpy:
 puts:
 	push %ebp
 	mov  %esp, %ebp
+	push %ebx
+
 	sub  $0x1, %esp
 
 	mov  0x08(%ebp), %ebx
@@ -152,7 +202,9 @@ puts:
 	call write
 	# write newline
 
-	mov $0x01, %eax # ret value
+	mov  $0x01, %eax # ret value
 
+	add  $0x01, %esp
+	pop  %ebx
 	leave
 	ret
