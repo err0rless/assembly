@@ -6,9 +6,11 @@
 	.global strlen
 	.global strchr
 	.global strcpy
+	.global gets
 	.global puts
 
 # ssize_t write(int fd, const void *buf, size_t count);
+# http://forum.falinux.com/zbxe/index.php?document_srl=408456&mid=C_LIB
 write:
 	push %ebp
 	mov  %esp, %ebp
@@ -34,6 +36,7 @@ write:
 
 
 # ssize_t read (int fd, void *buf, size_t nbytes);
+# http://forum.falinux.com/zbxe/index.php?document_srl=466628&mid=C_LIB
 read:
 	push %ebp
 	mov  %esp, %ebp
@@ -58,6 +61,7 @@ read:
 
 
 # void exit(int status);
+# http://www.joinc.co.kr/modules/moniwiki/wiki.php/man/3/exit
 exit:
 	push %ebp
 	mov  %esp, %ebp
@@ -68,7 +72,9 @@ exit:
 
 
 
+
 # size_t strlen(const char *str);
+# http://forum.falinux.com/zbxe/index.php?document_srl=408105&mid=C_LIB
 strlen:
 	push %ebp
 	mov  %esp, %ebp
@@ -101,6 +107,7 @@ strlen:
 
 
 # char *strchr(const char *str, int chr);
+# http://forum.falinux.com/zbxe/index.php?document_srl=408108&mid=C_LIB
 strchr:
 	push %ebp
 	mov  %esp, %ebp
@@ -138,6 +145,7 @@ strchr:
 
 
 # char *strcpy(char *dest, const char *src);
+# http://www.joinc.co.kr/modules/moniwiki/wiki.php/man/3/strcpy
 strcpy:
         push %ebp
         mov  %esp, %ebp
@@ -173,8 +181,49 @@ strcpy:
         ret
 
 
+# char *gets(char *s);
+# http://www.joinc.co.kr/modules/moniwiki/wiki.php/man/3/gets
+gets:
+        push %ebp
+        mov  %esp, %ebp
+        push %ebx
+        push %ecx
+
+        sub  $0x1000, %esp
+
+        lea -0x1000(%ebp), %ebx
+
+        push $0x1000
+        push %ebx
+        push $0x00
+        call read
+
+        push $0x0a
+        push %ebx
+        call strchr
+
+        movb $0x00, (%eax) # '\n' = '\0'
+
+        mov  0x08(%ebp), %ecx
+
+        push %ebx
+        push %ecx
+        call strcpy
+
+        mov  %ecx, %eax # ret
+
+        add  $0x1000, %esp
+        pop  %ecx
+        pop  %ebx
+        leave
+        ret
+
+
+
+
 
 # int puts(const char *str);
+# http://itguru.tistory.com/48
 puts:
 	push %ebp
 	mov  %esp, %ebp
