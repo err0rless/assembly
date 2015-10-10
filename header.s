@@ -1,4 +1,4 @@
-# /root/assembly/h.s
+# header.s / header.inc
 .text
 	.global write
 	.global read
@@ -8,6 +8,7 @@
 	.global strcpy
 	.global gets
 	.global puts
+
 
 # ssize_t write(int fd, const void *buf, size_t count);
 # http://forum.falinux.com/zbxe/index.php?document_srl=408456&mid=C_LIB
