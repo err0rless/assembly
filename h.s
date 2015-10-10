@@ -1,6 +1,6 @@
 # /root/assembly/h.s
 
-# ssize_t write(int fd, char *buf, size_t count);
+# ssize_t write(int fd, const void *buf, size_t count);
 write:
 	push %ebp
 	mov  %esp, %ebp
@@ -16,6 +16,31 @@ write:
 
 	mov  %edx, %eax
 
+	pop  %edx
+	pop  %ecx
+	pop  %ebx
+	leave
+	ret
+
+
+
+
+# ssize_t read (int fd, void *buf, size_t nbytes);
+read:
+	push %ebp
+	mov  %esp, %ebp
+	push %ebx
+	push %ecx
+	push %edx
+
+	mov  0x08(%ebp), %ebx # fd
+	mov  0x0C(%ebp), %ecx # buf
+	mov  0x10(%ebp), %edx # len
+	mov  $0x03, %eax
+	int  $0x80
+
+	mov  0x10(%ebp), %eax
+	
 	pop  %edx
 	pop  %ecx
 	pop  %ebx
