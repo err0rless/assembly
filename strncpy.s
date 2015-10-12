@@ -89,6 +89,3 @@ main:
 .exit:
 	push $0x00
 	call exit
-
-	leave
-	ret
