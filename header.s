@@ -6,6 +6,7 @@
 	.global strlen
 	.global strchr
 	.global strcpy
+	.global strncpy
 	.global gets
 	.global puts
 
@@ -148,76 +149,130 @@ strchr:
 # char *strcpy(char *dest, const char *src);
 # http://www.joinc.co.kr/modules/moniwiki/wiki.php/man/3/strcpy
 strcpy:
-        push %ebp
-        mov  %esp, %ebp
-        push %ebx
+	push %ebp
+	mov  %esp, %ebp
+	push %ebx
 	push %esi
 	push %edi
 
-        mov  0x08(%ebp), %edi # dest
-        mov  0x0C(%ebp), %esi # src
+	mov  0x08(%ebp), %edi # dest
+	mov  0x0C(%ebp), %esi # src
 
-        mov  %edi, %ebx # ebx = ret value
+	mov  %edi, %ebx # ebx = ret value
 
 .strcpy_loop:
-        cmpb $0x00, (%esi)
-        je   .strcpy_final
+	cmpb $0x00, (%esi)
+	je   .strcpy_final
 
-        movb (%esi), %al
-        movb %al, (%edi)
+	movb (%esi), %al
+	movb %al, (%edi)
 
-        inc  %edi
-        inc  %esi
+	inc  %edi
+	inc  %esi
 
-        jmp  .strcpy_loop
+	jmp  .strcpy_loop
 
 .strcpy_final:
-        movb $0x00, (%edi)
-        mov  %ebx, %eax
+	movb $0x00, (%edi)
+	mov  %ebx, %eax
 
 	pop  %edi
 	pop  %esi
-        pop  %ebx
-        leave
-        ret
+	pop  %ebx
+	leave
+	ret
+
+
+
+
+# char *strncpy(char *dest, const char *src, size_t n);
+# http://www.joinc.co.kr/modules/moniwiki/wiki.php/man/3/strcpy
+strncpy:
+	push %ebp
+	mov  %esp, %ebp
+	push %ebx
+	push %ecx
+	push %edx
+	push %esi
+	push %edi
+
+	mov  $0x00, %ecx # cnt = 0
+	mov  0x08(%ebp), %edi
+	mov  0x0C(%ebp), %esi
+	mov  0x10(%ebp), %ebx
+
+	mov  %edi, %edx # ret value
+.strncpy_loop:
+	cmp  %ecx, %ebx
+	je   .strncpy_final
+
+	cmpb $0x00, (%esi)
+	je   .esiNull
+
+	movb (%esi), %al
+	movb %al, (%edi)
+
+	inc  %esi
+.tmp:
+	inc  %edi
+	inc  %ecx # cnt++
+
+	jmp  .strncpy_loop
+
+.strncpy_final:
+	movb $0x00, (%edi)
+	mov  %ebx, %eax
+
+	pop %edi
+	pop %esi
+	pop %edx
+	pop %ecx
+	pop %ebx
+	leave
+	ret
+
+.esiNull: # if strlen(src) < n ; fill the dest to null
+	movb $0x00, (%edi)
+
+
 
 
 # char *gets(char *s);
 # http://www.joinc.co.kr/modules/moniwiki/wiki.php/man/3/gets
 gets:
-        push %ebp
-        mov  %esp, %ebp
-        push %ebx
-        push %ecx
+	push %ebp
+	mov  %esp, %ebp
+	push %ebx
+	push %ecx
 
-        sub  $0x1000, %esp
+	sub  $0x1000, %esp
 
-        lea -0x1000(%ebp), %ebx
+	lea -0x1000(%ebp), %ebx
 
-        push $0x1000
-        push %ebx
-        push $0x00
-        call read
+	push $0x1000
+	push %ebx
+	push $0x00
+	call read
 
-        push $0x0a
-        push %ebx
-        call strchr
+	push $0x0a
+	push %ebx
+	call strchr
 
-        movb $0x00, (%eax) # '\n' = '\0'
+	movb $0x00, (%eax) # '\n' = '\0'
 
-        mov  0x08(%ebp), %ecx
+	mov  0x08(%ebp), %ecx
 
-        push %ebx
-        push %ecx
-        call strcpy
+	push %ebx
+	push %ecx
+	call strcpy
 
-        mov  %ecx, %eax # ret
+	mov  %ecx, %eax # ret
 
-        add  $0x1000, %esp
-        pop  %ecx
-        pop  %ebx
-        leave
-        ret
+	add  $0x1000, %esp
+	pop  %ecx
+	pop  %ebx
+	leave
+	ret
 
 
 
